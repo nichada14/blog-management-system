@@ -81,13 +81,7 @@ export default function BlogList() {
               blog={blog}
               isOwner={isOwner}
               onDelete={isOwner ? () => handleDelete(blog.id) : undefined}
-              onEdit={() => {
-                if (isOwner) {
-                  navigate(`/blogs/edit/${blog.id}`);
-                } else {
-                  alert("Not authorized to edit this blog");
-                }
-              }}
+              onEdit={() => {navigate(`/blogs/${blog.id}/edit`);}}
             />
           );
         })
