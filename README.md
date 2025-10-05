@@ -19,7 +19,8 @@
 
 ### Prerequisites
 
-- Node.js >= 16.x
+- Node.js ≥ 18.x  
+(Required by Prisma 6.x and Express 5.x)
 - npm or yarn
 - PostgreSQL database
 
@@ -46,7 +47,11 @@ The backend will run on http://localhost:4000 (or the port you configured).
 
 ---
 
+<<<<<<< HEAD
 ### Frontend setup
+=======
+### Frontend Setup
+>>>>>>> 9b06a30ce1147b4ffbccd9f6e31eabacfc5bcd1b
 
 ```bash
 cd client

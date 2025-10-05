@@ -22,10 +22,10 @@ export default function BlogCard({ blog, isOwner, onEdit, onDelete }: BlogCardPr
       {/* Show edit and delete buttons only if current user is the owner */}
       {isOwner && (
         <div className="mt-3 flex gap-3">
-          <button onClick={onEdit} className="text-sm text-yellow-600 hover:underline" aria-label="Edit blog">
+          <button onClick={onEdit} className="text-sm text-yellow-600 hover:underline cursor-pointer" aria-label="Edit blog">
             ✏️ Edit
           </button>
-          <button onClick={onDelete} className="text-sm text-red-600 hover:underline" aria-label="Delete blog">
+          <button onClick={onDelete} className="text-sm text-red-600 hover:underline cursor-pointer" aria-label="Delete blog">
             🗑️ Delete
           </button>
         </div>

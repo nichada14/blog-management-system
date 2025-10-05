@@ -8,6 +8,7 @@ export interface User {
     id: string;
     title: string;
     content: string;
+    authorId: string; 
     author: User;
     createdAt: string;
     updatedAt?: string;

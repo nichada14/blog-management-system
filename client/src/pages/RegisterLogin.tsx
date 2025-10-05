@@ -4,20 +4,45 @@ import axios from "axios";
 import AuthForm from "../components/AuthForm";
 import type { LoginPayload, RegisterPayload } from "../types/auth";
 
+function parseJwt(token: string) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return null;
+  }
+}
 
 export default function RegisterLogin() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Call API to login user with email and password
   const handleLogin = async (data: LoginPayload) => {
     setIsLoading(true);
     setErrorMessage("");
     try {
+      // Login request
       const res = await axios.post("/api/auth/login", data);
-      localStorage.setItem("token", res.data.token); // Save JWT token for auth
-      navigate("/blogs/list"); // Redirect to blogs page after login
+      const token = res.data.token;
+      localStorage.setItem("token", token);
+
+      // Decode token to get userId
+      const decoded = parseJwt(token);
+      if (decoded && decoded.userId) {
+        localStorage.setItem("userId", decoded.userId);
+
+        // Fetch user profile to get username
+        const userRes = await axios.get(`/api/users/${decoded.userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        localStorage.setItem("username", userRes.data.username);
+      } else {
+        localStorage.removeItem("userId");
+        localStorage.removeItem("username");
+      }
+
+      navigate("/blogs/list");
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || "Login failed");
     } finally {
@@ -25,13 +50,14 @@ export default function RegisterLogin() {
     }
   };
 
-  // Call API to register user with username, email and password
   const handleRegister = async (data: RegisterPayload) => {
     setIsLoading(true);
     setErrorMessage("");
     try {
+      // Register new user
       await axios.post("/api/auth/register", data);
-      // Auto-login after successful register
+
+      // Auto-login after registration
       await handleLogin({ email: data.email, password: data.password });
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || "Registration failed");

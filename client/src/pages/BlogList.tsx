@@ -7,21 +7,23 @@ import type { Blog } from "../types/blog";
 
 export default function BlogList() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const currentUserId = localStorage.getItem("userId") || "";
 
-  // Fetch all blogs from API (with optional search query)
-  const fetchBlogs = async (query = "") => {
+  const fetchBlogs = async () => {
     try {
       const res = await axios.get("/api/blogs", {
-        params: { search: query },
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setBlogs(res.data);
+      setFilteredBlogs(res.data);
     } catch (error) {
-      // Redirect to login if unauthorized
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         navigate("/auth");
+      } else {
+        console.error("Failed to fetch blogs", error);
       }
     }
   };
@@ -30,20 +32,28 @@ export default function BlogList() {
     fetchBlogs();
   }, []);
 
-  // Handle searching blogs by keyword
   const handleSearch = (query: string) => {
     setSearchTerm(query);
-    fetchBlogs(query);
+    const lowerQuery = query.toLowerCase();
+
+    const filtered = blogs.filter((blog) =>
+      blog.title.toLowerCase().includes(lowerQuery)
+    );
+
+    setFilteredBlogs(filtered);
   };
 
-  // Delete blog by id, only owner allowed (handled on server)
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure to delete this blog?")) return;
+
     try {
       await axios.delete(`/api/blogs/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+
+      // อัปเดตทั้งสอง state หลังลบ
       setBlogs((prev) => prev.filter((b) => b.id !== id));
+      setFilteredBlogs((prev) => prev.filter((b) => b.id !== id));
     } catch (error) {
       alert("Failed to delete blog");
     }
@@ -61,22 +71,29 @@ export default function BlogList() {
         </button>
       </div>
 
-      {/* Search component */}
       <BlogSearch onSearch={handleSearch} />
 
-      {/* List all blogs */}
-      {blogs.length === 0 ? (
+      {filteredBlogs.length === 0 ? (
         <p className="text-gray-500">No blogs found.</p>
       ) : (
-        blogs.map((blog) => (
-          <BlogCard
-            key={blog.id}
-            blog={blog}
-            isOwner={false} 
-            onDelete={() => handleDelete(blog.id)}
-            onEdit={() => navigate(`/blogs/edit/${blog.id}`)}
-          />
-        ))
+        filteredBlogs.map((blog) => {
+          const isOwner = String(blog.author.id) === currentUserId;
+          return (
+            <BlogCard
+              key={blog.id}
+              blog={blog}
+              isOwner={isOwner}
+              onDelete={isOwner ? () => handleDelete(blog.id) : undefined}
+              onEdit={() => {
+                if (isOwner) {
+                  navigate(`/blogs/edit/${blog.id}`);
+                } else {
+                  alert("Not authorized to edit this blog");
+                }
+              }}
+            />
+          );
+        })
       )}
     </div>
   );

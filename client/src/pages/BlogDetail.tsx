@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import CommentList from "../components/CommentList";
-import CommentInput from "../components/CommentInput";
+// import CommentList from "../components/CommentList";
+// import CommentInput from "../components/CommentInput";
 import type { Blog } from "../types/blog";
 
 export default function BlogDetail() {
@@ -33,24 +33,32 @@ export default function BlogDetail() {
   }, [id]);
 
   // Handle submit new comment to API, then reload comments
-  const handleAddComment = async (content: string) => {
-    try {
-      await axios.post(
-        `/api/blogs/${id}/comments`,
-        { content },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-      );
-      fetchBlogDetail(); // Refresh blog detail with new comment
-    } catch (error) {
-      alert("Failed to add comment");
-    }
-  };
+  // const handleAddComment = async (content: string) => {
+  //   try {
+  //     await axios.post(
+  //       `/api/blogs/${id}/comments`,
+  //       { content },
+  //       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+  //     );
+  //     fetchBlogDetail(); // Refresh blog detail with new comment
+  //   } catch (error) {
+  //     alert("Failed to add comment");
+  //   }
+  // };
 
   if (isLoading) return <p className="text-center mt-10">Loading...</p>;
   if (!blog) return <p className="text-center mt-10">Blog not found</p>;
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-4 bg-white rounded shadow-md">
+      {/* Back button */}
+      <button
+        onClick={() => navigate("/blogs/list")}
+        className="mb-6 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        ← Back to Blogs
+      </button>
+
       <h1 className="text-3xl font-bold">{blog.title}</h1>
       <p className="text-sm text-gray-500 mb-6">
         ✍️ {blog.author.username} • 🕓 {new Date(blog.createdAt).toLocaleString()}
@@ -58,13 +66,13 @@ export default function BlogDetail() {
 
       <div className="prose mb-10 whitespace-pre-wrap">{blog.content}</div>
 
-      <hr />
+      {/* <hr />
 
       <h2 className="text-2xl font-semibold mt-8">Comments</h2>
 
       <CommentList comments={blog.comments} />
 
-      <CommentInput onSubmit={handleAddComment} />
+      <CommentInput onSubmit={handleAddComment} /> */}
     </div>
   );
 }
