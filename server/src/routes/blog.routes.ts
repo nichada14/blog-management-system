@@ -16,7 +16,7 @@ const router = Router()
 router.get('/', getAllBlogs)
 
 // Public - Get blog by ID
-router.get('/:id', getBlogById)
+router.get('/:id', authMiddleware, getBlogById)
 
 // Protected - Create blog
 router.post('/', authMiddleware, createBlog)
