@@ -8,9 +8,14 @@ import type { Blog } from "../types/blog";
 export default function BlogList() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+
   const currentUserId = localStorage.getItem("userId") || "";
+
+  useEffect(() => {
+    console.log("Current userId from localStorage:", currentUserId);
+    fetchBlogs();
+  }, []);
 
   const fetchBlogs = async () => {
     try {
@@ -28,19 +33,11 @@ export default function BlogList() {
     }
   };
 
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
-
   const handleSearch = (query: string) => {
-    setSearchTerm(query);
     const lowerQuery = query.toLowerCase();
-
-    const filtered = blogs.filter((blog) =>
-      blog.title.toLowerCase().includes(lowerQuery)
+    setFilteredBlogs(
+      blogs.filter((blog) => blog.title.toLowerCase().includes(lowerQuery))
     );
-
-    setFilteredBlogs(filtered);
   };
 
   const handleDelete = async (id: string) => {
@@ -50,11 +47,9 @@ export default function BlogList() {
       await axios.delete(`/api/blogs/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-
-      // อัปเดตทั้งสอง state หลังลบ
       setBlogs((prev) => prev.filter((b) => b.id !== id));
       setFilteredBlogs((prev) => prev.filter((b) => b.id !== id));
-    } catch (error) {
+    } catch {
       alert("Failed to delete blog");
     }
   };
@@ -77,7 +72,9 @@ export default function BlogList() {
         <p className="text-gray-500">No blogs found.</p>
       ) : (
         filteredBlogs.map((blog) => {
-          const isOwner = String(blog.author.id) === currentUserId;
+          const isOwner = blog.author.id === currentUserId;
+          console.log({ blogAuthorId: blog.author.id, currentUserId, isOwner });
+
           return (
             <BlogCard
               key={blog.id}

@@ -4,6 +4,7 @@ import axios from "axios";
 import AuthForm from "../components/AuthForm";
 import type { LoginPayload, RegisterPayload } from "../types/auth";
 
+// Decode JWT token
 function parseJwt(token: string) {
   try {
     return JSON.parse(atob(token.split('.')[1]));
@@ -20,23 +21,23 @@ export default function RegisterLogin() {
   const handleLogin = async (data: LoginPayload) => {
     setIsLoading(true);
     setErrorMessage("");
+
     try {
       // Login request
       const res = await axios.post("/api/auth/login", data);
       const token = res.data.token;
       localStorage.setItem("token", token);
 
-      // Decode token to get userId
+      // Decode token to extract userId and username
       const decoded = parseJwt(token);
+      console.log("Decoded JWT:", decoded); 
+
       if (decoded && decoded.userId) {
-        localStorage.setItem("userId", decoded.userId);
-
-        // Fetch user profile to get username
-        const userRes = await axios.get(`/api/users/${decoded.userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        localStorage.setItem("username", userRes.data.username);
+        localStorage.setItem("userId", String(decoded.userId));
+        
+        if (decoded.username) {
+          localStorage.setItem("username", String(decoded.username));
+        }
       } else {
         localStorage.removeItem("userId");
         localStorage.removeItem("username");
@@ -54,10 +55,10 @@ export default function RegisterLogin() {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      // Register new user
+      // Register user
       await axios.post("/api/auth/register", data);
 
-      // Auto-login after registration
+      // Auto login after register
       await handleLogin({ email: data.email, password: data.password });
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || "Registration failed");
@@ -67,7 +68,12 @@ export default function RegisterLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <AuthForm onLogin={handleLogin} onRegister={handleRegister} isLoading={isLoading} errorMessage={errorMessage} />
+      <AuthForm
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        isLoading={isLoading}
+        errorMessage={errorMessage}
+      />
     </div>
   );
 }
