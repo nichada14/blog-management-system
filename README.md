@@ -46,7 +46,7 @@ The backend will run on http://localhost:4000 (or the port you configured).
 
 ---
 
-### Frontend Setup
+### Frontend setup
 
 ```bash
 cd client
