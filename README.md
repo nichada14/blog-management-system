@@ -44,9 +44,11 @@ Copy code
 npm run dev
 The backend will run on http://localhost:4000 (or the port you configured).
 
-Frontend Setup
-bash
-Copy code
+---
+
+### Frontend Setup
+
+```bash
 cd client
 npm install
 npm run dev
